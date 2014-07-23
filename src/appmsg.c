@@ -73,8 +73,9 @@ static void out_received_handler(DictionaryIterator *iterator, void *context) {
 	//APP_LOG(APP_LOG_LEVEL_INFO, "App Message sent");
 	ack_count++;
 	msg_run = false;
-
-	
+}
+static void in_received_handler(DictionaryIterator *iterator, void *context) {
+	APP_LOG(APP_LOG_LEVEL_INFO, "!!!! IT CAME BACK!!!!!");
 }
 void accel_data_handler(AccelData *data, uint32_t num_samples) {
 
@@ -89,6 +90,31 @@ void accel_data_handler(AccelData *data, uint32_t num_samples) {
 
 	sample_count++;
 }
+
+void send_action(int key, char *value) {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+
+  if (iter == NULL) {
+    return;
+  }
+
+  dict_write_cstring(iter, key, value);
+  dict_write_end(iter);
+
+  app_message_outbox_send();
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+	send_action(314,"DO_SOMETHING_BESIDES_ACCEL");
+}
+
+
+static void click_config_provider(void *context) {
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+}
+
+
 void handle_init(void) {
 	Layer *window_layer;
 	TimeUnits units_changed = SECOND_UNIT;
@@ -96,6 +122,7 @@ void handle_init(void) {
 	window_layer = window_get_root_layer(window);
 	font_count = fonts_get_system_font(FONT_KEY_GOTHIC_28);
 
+  	window_set_click_config_provider(window, click_config_provider);
 	
 	text_layer = text_layer_create(GRect(0, 5, 144, 140));
 	text_layer_set_font(text_layer, font_count);
@@ -110,8 +137,11 @@ void handle_init(void) {
 	
 	app_message_register_outbox_failed(out_failed_handler);
 	app_message_register_outbox_sent(out_received_handler);
-	app_message_open(64, 600);
-	timer = app_timer_register(timer_interval, timer_callback, NULL);
+	app_message_register_inbox_received(in_received_handler);
+    int in_size = app_message_inbox_size_maximum();
+    int out_size = app_message_outbox_size_maximum();
+    app_message_open(in_size, out_size);	
+    timer = app_timer_register(timer_interval, timer_callback, NULL);
 	app_comm_set_sniff_interval(SNIFF_INTERVAL_REDUCED);
 }
 
