@@ -1,0 +1,23 @@
+{
+  "uuid": "450a1a15-0076-4fc7-b230-6b7fa28deff8",
+    "appKeys": {
+        "Count": 43,
+        "XYZ": 46,
+        "Data": 45,
+        "Time": 44
+    },
+  "shortName": "APP_MSG_2",
+  "longName": "APP_MSG_2",
+  "companyName": "MakeAwesomeHappen",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
