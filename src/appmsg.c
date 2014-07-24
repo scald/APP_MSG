@@ -1,15 +1,16 @@
 #include <pebble.h>
 
-uint8_t sample_freq = ACCEL_SAMPLING_50HZ;
+uint8_t sample_freq = ACCEL_SAMPLING_10HZ;
 Window *window;
 TextLayer *text_layer;
+TextLayer *text_layer2;
 uint16_t sample_count=0;
 uint16_t acc_count=0;
 uint16_t ack_count=0;
 uint16_t fail_count=0;
 int16_t *acc_data;
 time_t   acc_time;
-uint8_t num_samples = 25; 
+uint8_t num_samples = 5; 
 static DictionaryIterator dict_iter, *iter = &dict_iter;
 GFont *font_count;
 char *xyz_str = "X,Y,Z:                      ";
@@ -21,7 +22,7 @@ AppTimer *timer;
 
 #define KEY_Count	43
 #define KEY_Time	44
-#define KEY_Data	45
+#define KEY_Data	45 
 #define KEY_XYZ		46
 
 void request_send_acc(void) {
@@ -76,6 +77,7 @@ static void out_received_handler(DictionaryIterator *iterator, void *context) {
 }
 static void in_received_handler(DictionaryIterator *iterator, void *context) {
 	APP_LOG(APP_LOG_LEVEL_INFO, "!!!! IT CAME BACK!!!!!");
+	text_layer_set_text(text_layer2, "!!!! IT CAME BACK!!!!!");
 }
 void accel_data_handler(AccelData *data, uint32_t num_samples) {
 
@@ -106,6 +108,7 @@ void send_action(int key, char *value) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+	text_layer_set_text(text_layer2, "---");
 	send_action(314,"DO_SOMETHING_BESIDES_ACCEL");
 }
 
@@ -128,10 +131,14 @@ void handle_init(void) {
 	text_layer_set_font(text_layer, font_count);
 	layer_add_child(window_layer, text_layer_get_layer(text_layer));
 
+	text_layer2 = text_layer_create(GRect(0, 125, 144, 140));
+	text_layer_set_font(text_layer2, font_count);
+	layer_add_child(window_layer, text_layer_get_layer(text_layer2));
+
 	window_stack_push(window, true /* Animated */);
 	tick_timer_service_subscribe(SECOND_UNIT, handle_second_tick);
 	//accel_service_set_sampling_rate(sample_freq); //This is the logicl place
-	accel_data_service_subscribe(25, &accel_data_handler);
+	accel_data_service_subscribe(5, &accel_data_handler);
 	accel_service_set_sampling_rate(sample_freq); //This is the place that works
 	acc_data= malloc(num_samples * 6);
 	
